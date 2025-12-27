@@ -42,6 +42,24 @@ app.post("/books", (req, res) => {
 });
 
 // =====================
+// SEARCH BOOKS BY TITLE
+// =====================
+app.get("/books/search", (req, res) => {
+  const query = req.query.q;
+
+  if (!query) {
+    return res.status(400).json({ message: "Search query is required" });
+  }
+
+  const books = readBooks();
+  const results = books.filter(book =>
+    book.title.toLowerCase().includes(query.toLowerCase())
+  );
+
+  res.json(results);
+});
+
+// =====================
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
