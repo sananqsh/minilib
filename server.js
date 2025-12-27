@@ -31,7 +31,7 @@ app.post("/books", (req, res) => {
 
   const exists = books.find(b => b.id === id);
   if (exists) {
-    return res.status(403).json({ message: "Book with this ID already exists" });
+    return res.status(409).json({ message: "Book with this ID already exists" });
   }
 
   const newBook = { id, title, author, published_year };
