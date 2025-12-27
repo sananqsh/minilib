@@ -40,6 +40,22 @@ app.post("/books", (req, res) => {
 
   res.status(201).json(newBook);
 });
+// =====================
+// DELETE BOOK
+// =====================
+app.delete("/books/:id", (req, res) => {
+  const { id } = req.params;
+  const books = readBooks();
+
+  const filteredBooks = books.filter(b => b.id !== id);
+
+  if (books.length === filteredBooks.length) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  writeBooks(filteredBooks);
+  res.json({ message: "Book deleted successfully" });
+});
 
 // =====================
 app.listen(PORT, () => {
