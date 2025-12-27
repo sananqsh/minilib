@@ -18,6 +18,30 @@ function writeBooks(books) {
 }
 
 // =====================
+// CREATE BOOK
+// =====================
+app.post("/books", (req, res) => {
+  const { id, title, author, published_year } = req.body;
+
+  if (!id || !title || !author || !published_year) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const books = readBooks();
+
+  const exists = books.find(b => b.id === id);
+  if (exists) {
+    return res.status(400).json({ message: "Book with this ID already exists" });
+  }
+
+  const newBook = { id, title, author, published_year };
+  books.push(newBook);
+  writeBooks(books);
+
+  res.status(201).json(newBook);
+});
+
+// =====================
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
