@@ -8,6 +8,19 @@ const BOOKS_FILE = path.join(__dirname, "books.json");
 
 app.use(express.json());
 
+// =====================
+// CORS SUPPORT
+// =====================
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+// =====================
+// DATA READ/WRITE
+// =====================
 function readBooks() {
   const data = fs.readFileSync(BOOKS_FILE, "utf-8");
   return JSON.parse(data);
@@ -16,6 +29,14 @@ function readBooks() {
 function writeBooks(books) {
   fs.writeFileSync(BOOKS_FILE, JSON.stringify(books, null, 2));
 }
+
+// =====================
+// GET BOOKS
+// =====================
+app.get("/books", (req, res) => {
+  const books = readBooks();
+  res.json(books);
+});
 
 // =====================
 // CREATE BOOK
@@ -29,9 +50,14 @@ app.post("/books", (req, res) => {
 
   const books = readBooks();
 
-  const exists = books.find(b => b.id === id);
-  if (exists) {
+  const idExists = books.find(b => b.id === id);
+  if (idExists) {
     return res.status(409).json({ message: "Book with this ID already exists" });
+  }
+
+  const titleExists = books.find(b => b.title === title);
+  if (titleExists) {
+    return res.status(409).json({ message: "Book with this title already exists" });
   }
 
   const newBook = { id, title, author, published_year };
@@ -40,6 +66,7 @@ app.post("/books", (req, res) => {
 
   res.status(201).json(newBook);
 });
+
 // =====================
 // DELETE BOOK
 // =====================
@@ -47,8 +74,7 @@ app.delete("/books/:id", (req, res) => {
   const { id } = req.params;
   const books = readBooks();
 
-  const filteredBooks = books.filter(b => b.id !== id);
-
+  const filteredBooks = books.filter(b => b.id !== parseInt(id));
   if (books.length === filteredBooks.length) {
     return res.status(404).json({ message: "Book not found" });
   }
@@ -75,6 +101,8 @@ app.get("/books/search", (req, res) => {
   res.json(results);
 });
 
+// =====================
+// SERVER RUNNING
 // =====================
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
